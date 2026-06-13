@@ -4,6 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import { testimonialsData } from '../data/data';
 import { Link } from 'react-router-dom';
 
+
+
+const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+useEffect(() => {
+  const handleResize = () => setIsMobile(window.innerWidth <= 768);
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+
 function HomePage({ showToast }) {
   const navigate = useNavigate();
   const [counters, setCounters] = useState({ stays: 0, countries: 0, rating: 0 });
@@ -149,7 +159,12 @@ function HomePage({ showToast }) {
   pay easily in Algerian Dinar via Baridi Mob.
           </p>
 
-          <div className="hero-stats">
+          <div className="hero-stats" style={{ 
+  display: 'flex', 
+  flexDirection: isMobile ? 'column' : 'row',
+  gap: isMobile ? '20px' : '40px',
+  justifyContent: 'center'
+}}>
             <div className="hero-stat">
               <div className="hero-stat-num">{counters.stays}</div>
               <div className="hero-stat-label">Houses</div>

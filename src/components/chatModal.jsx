@@ -7,12 +7,18 @@ export function ChatModal({ conversation, currentUser, onClose, showToast }) {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const messagesEndRef = useRef(null);
-  const messagesContainerRef = useRef(null);
+  const subscriptionRef = useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const otherUser = conversation.other_user;
 
-  // Charger les messages
   useEffect(() => {
     loadMessages();
     markAsRead();
@@ -24,8 +30,6 @@ export function ChatModal({ conversation, currentUser, onClose, showToast }) {
       }
     };
   }, [conversation.conversation_id]);
-
-  const subscriptionRef = useRef(null);
 
   const setupRealtimeSubscription = () => {
     subscriptionRef.current = supabase
@@ -48,10 +52,7 @@ export function ChatModal({ conversation, currentUser, onClose, showToast }) {
   const loadMessages = async () => {
     try {
       setLoading(true);
-      const data = await getMessages(
-        conversation.conversation_id,
-        currentUser.user_id
-      );
+      const data = await getMessages(conversation.conversation_id, currentUser.user_id);
       setMessages(data);
       scrollToBottom();
     } catch (error) {
@@ -119,18 +120,18 @@ export function ChatModal({ conversation, currentUser, onClose, showToast }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px'
+        padding: isMobile ? '10px' : '20px'
       }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
         style={{
           background: 'white',
-          borderRadius: '16px',
+          borderRadius: isMobile ? '12px' : '16px',
           width: '100%',
-          maxWidth: '600px',
-          height: '80vh',
-          maxHeight: '700px',
+          maxWidth: isMobile ? '95%' : '600px',
+          height: isMobile ? '85vh' : '80vh',
+          maxHeight: isMobile ? '600px' : '700px',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -140,7 +141,7 @@ export function ChatModal({ conversation, currentUser, onClose, showToast }) {
         {/* Header */}
         <div
           style={{
-            padding: '16px 20px',
+            padding: isMobile ? '12px 16px' : '16px 20px',
             background: '#0B1426',
             color: 'white',
             display: 'flex',
@@ -149,20 +150,20 @@ export function ChatModal({ conversation, currentUser, onClose, showToast }) {
             borderBottom: '1px solid rgba(255,255,255,0.1)'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '12px' }}>
             <img
               src={otherUser?.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(otherUser?.full_name || 'U')}&background=C9A84C&color=fff`}
               alt={otherUser?.full_name}
               style={{
-                width: '40px',
-                height: '40px',
+                width: isMobile ? '36px' : '40px',
+                height: isMobile ? '36px' : '40px',
                 borderRadius: '50%',
                 objectFit: 'cover'
               }}
             />
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px' }}>{otherUser?.full_name}</h3>
-              <p style={{ margin: 0, fontSize: '12px', opacity: 0.7 }}>
+              <h3 style={{ margin: 0, fontSize: isMobile ? '14px' : '16px' }}>{otherUser?.full_name}</h3>
+              <p style={{ margin: 0, fontSize: isMobile ? '10px' : '12px', opacity: 0.7 }}>
                 {conversation.properties?.title}
               </p>
             </div>
@@ -173,9 +174,9 @@ export function ChatModal({ conversation, currentUser, onClose, showToast }) {
               background: 'none',
               border: 'none',
               color: 'white',
-              fontSize: '24px',
+              fontSize: isMobile ? '20px' : '24px',
               cursor: 'pointer',
-              padding: '0 8px'
+              padding: isMobile ? '0 4px' : '0 8px'
             }}
           >
             ×
@@ -184,15 +185,14 @@ export function ChatModal({ conversation, currentUser, onClose, showToast }) {
 
         {/* Messages area */}
         <div
-          ref={messagesContainerRef}
           style={{
             flex: 1,
             overflowY: 'auto',
-            padding: '20px',
+            padding: isMobile ? '16px' : '20px',
             background: '#f5f5f5',
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px'
+            gap: isMobile ? '10px' : '12px'
           }}
         >
           {loading ? (
@@ -216,20 +216,20 @@ export function ChatModal({ conversation, currentUser, onClose, showToast }) {
                 >
                   <div
                     style={{
-                      maxWidth: '70%',
-                      padding: '10px 14px',
+                      maxWidth: isMobile ? '80%' : '70%',
+                      padding: isMobile ? '8px 12px' : '10px 14px',
                       borderRadius: '18px',
                       background: isOwn ? '#C9A84C' : 'white',
                       color: isOwn ? '#0B1426' : '#333',
                       boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                     }}
                   >
-                    <p style={{ margin: 0, fontSize: '14px', wordWrap: 'break-word' }}>
+                    <p style={{ margin: 0, fontSize: isMobile ? '13px' : '14px', wordWrap: 'break-word' }}>
                       {msg.message}
                     </p>
                     <div
                       style={{
-                        fontSize: '10px',
+                        fontSize: isMobile ? '9px' : '10px',
                         marginTop: '4px',
                         opacity: 0.6,
                         textAlign: isOwn ? 'right' : 'left'
@@ -253,11 +253,11 @@ export function ChatModal({ conversation, currentUser, onClose, showToast }) {
         {/* Input area */}
         <div
           style={{
-            padding: '16px 20px',
+            padding: isMobile ? '12px 16px' : '16px 20px',
             background: 'white',
             borderTop: '1px solid #e0e0e0',
             display: 'flex',
-            gap: '12px',
+            gap: isMobile ? '8px' : '12px',
             alignItems: 'center'
           }}
         >
@@ -269,10 +269,10 @@ export function ChatModal({ conversation, currentUser, onClose, showToast }) {
             placeholder="Écrivez votre message..."
             style={{
               flex: 1,
-              padding: '12px 16px',
+              padding: isMobile ? '10px 14px' : '12px 16px',
               border: '1px solid #ddd',
               borderRadius: '25px',
-              fontSize: '14px',
+              fontSize: isMobile ? '14px' : '14px',
               outline: 'none',
               fontFamily: 'inherit'
             }}
@@ -281,14 +281,16 @@ export function ChatModal({ conversation, currentUser, onClose, showToast }) {
             onClick={handleSendMessage}
             disabled={sending || !newMessage.trim()}
             style={{
-              padding: '10px 20px',
+              padding: isMobile ? '8px 16px' : '10px 20px',
               background: '#C9A84C',
               color: '#0B1426',
               border: 'none',
               borderRadius: '25px',
               cursor: (sending || !newMessage.trim()) ? 'not-allowed' : 'pointer',
               fontWeight: 600,
-              opacity: (sending || !newMessage.trim()) ? 0.6 : 1
+              opacity: (sending || !newMessage.trim()) ? 0.6 : 1,
+              fontSize: isMobile ? '13px' : '14px',
+              whiteSpace: 'nowrap'
             }}
           >
             {sending ? '...' : 'Envoyer'}

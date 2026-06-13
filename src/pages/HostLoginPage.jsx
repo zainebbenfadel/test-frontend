@@ -6,6 +6,19 @@ import { useAuth } from '../context/AuthContext';
 function HostLoginPage({ showToast }) {
   const navigate = useNavigate();
   const { hostLogin, hostSignup } = useAuth();
+  
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth <= 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      setIsTablet(window.innerWidth <= 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [tab, setTab] = useState('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +31,6 @@ function HostLoginPage({ showToast }) {
   const [secQst, setSecQst] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Algerian wilayas list
   const algerianWilayas = [
     'Adrar', 'Chlef', 'Laghouat', 'Oum El Bouaghi', 'Batna', 'Béjaïa', 'Biskra', 'Béchar',
     'Blida', 'Bouira', 'Tamanrasset', 'Tébessa', 'Tlemcen', 'Tiaret', 'Tizi Ouzou', 'Alger',
@@ -29,7 +41,6 @@ function HostLoginPage({ showToast }) {
     'Ghardaïa', 'Relizane'
   ];
 
-  // Employment options
   const employmentOptions = [
     'Student', 'Employed Full-time', 'Employed Part-time', 'Self-employed',
     'Business Owner', 'Freelancer', 'Homemaker', 'Retired', 'Unemployed', 'Other'
@@ -37,12 +48,10 @@ function HostLoginPage({ showToast }) {
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
-  // Single unified submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (tab === 'signin') {
-      // Sign in validation
       if (!email || !password) { 
         showToast('⚠️ Please fill in all fields.'); 
         return; 
@@ -52,7 +61,6 @@ function HostLoginPage({ showToast }) {
       try {
         await hostLogin({ email, password });
         showToast('✨ Welcome back! Redirecting to dashboard...');
-        // Navigate to dashboard immediately after successful login
         navigate('/host-dashboard');
       } catch (err) {
         showToast(`❌ ${err.message}`);
@@ -60,7 +68,6 @@ function HostLoginPage({ showToast }) {
         setLoading(false);
       }
     } else {
-      // Sign up validation
       if (!fullName || !email || !password || !username) { 
         showToast('⚠️ Please fill in all required fields (*).'); 
         return; 
@@ -90,7 +97,6 @@ function HostLoginPage({ showToast }) {
         
         await hostSignup(signupData);
         showToast('✨ Account created! Please sign in.');
-        // Reset form and switch to signin
         setFullName('');
         setEmail('');
         setPassword('');
@@ -125,7 +131,7 @@ function HostLoginPage({ showToast }) {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '120px 24px 60px',
+      padding: isMobile ? '100px 16px 60px' : '120px 24px 60px',
       position: 'relative',
       overflow: 'auto'
     }}>
@@ -142,21 +148,21 @@ function HostLoginPage({ showToast }) {
         pointerEvents: 'none'
       }} />
 
-      <div style={{ width: '100%', maxWidth: '520px', position: 'relative', zIndex: 1 }}>
+      <div style={{ width: '100%', maxWidth: isMobile ? '100%' : '520px', position: 'relative', zIndex: 1 }}>
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <div className="section-eyebrow" style={{ justifyContent: 'center', color: 'var(--gold)', marginBottom: '16px' }}>
+        <div style={{ textAlign: 'center', marginBottom: isMobile ? '24px' : '40px' }}>
+          <div className="section-eyebrow" style={{ justifyContent: 'center', color: 'var(--gold)', marginBottom: '16px', fontSize: isMobile ? '12px' : '14px' }}>
             Host Portal
           </div>
           <h1 style={{
             fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 'clamp(32px, 5vw, 44px)',
-            fontWeight: 600, color: 'var(--white)', lineHeight: 1.1, marginBottom: '12px'
+            fontSize: 'clamp(28px, 5vw, 44px)',
+            fontWeight: 600, color: 'var(--white)', lineHeight: 1.2, marginBottom: '12px'
           }}>
             {tab === 'signin' ? 'Welcome Back,' : 'Join as a'}<br />
             <em style={{ color: 'var(--gold-light)' }}> Host</em>
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', lineHeight: 1.6, fontFamily: "'DM Sans', sans-serif" }}>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: isMobile ? '13px' : '14px', lineHeight: 1.6, fontFamily: "'DM Sans', sans-serif", padding: isMobile ? '0 16px' : '0' }}>
             {tab === 'signin'
               ? 'Sign in to access your host dashboard and listing tools.'
               : 'Create your account and start earning from your space.'}
@@ -168,29 +174,28 @@ function HostLoginPage({ showToast }) {
           background: 'rgba(255,255,255,0.04)',
           border: '1px solid rgba(201,168,76,0.15)',
           borderRadius: 'var(--radius-lg)',
-          padding: '40px',
+          padding: isMobile ? '24px' : '40px',
           backdropFilter: 'blur(20px)',
           boxShadow: '0 40px 80px rgba(0,0,0,0.4)'
         }}>
           {/* Tabs */}
-          <div className="modal-tabs" style={{ marginBottom: '32px' }}>
-            <button className={`modal-tab ${tab === 'signin' ? 'active' : ''}`} onClick={() => setTab('signin')}>
+          <div className="modal-tabs" style={{ marginBottom: isMobile ? '24px' : '32px', display: 'flex', gap: isMobile ? '8px' : '16px' }}>
+            <button className={`modal-tab ${tab === 'signin' ? 'active' : ''}`} onClick={() => setTab('signin')} style={{ flex: 1, padding: isMobile ? '12px' : '14px', fontSize: isMobile ? '14px' : '16px' }}>
               Sign In
             </button>
-            <button className={`modal-tab ${tab === 'signup' ? 'active' : ''}`} onClick={() => setTab('signup')}>
+            <button className={`modal-tab ${tab === 'signup' ? 'active' : ''}`} onClick={() => setTab('signup')} style={{ flex: 1, padding: isMobile ? '12px' : '14px', fontSize: isMobile ? '14px' : '16px' }}>
               Create Account
             </button>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '20px' }}>
 
-            {/* Signup-only fields - matching users table */}
+            {/* Signup-only fields */}
             {tab === 'signup' && (
               <>
-                {/* Full Name - required */}
                 <div className="form-field">
-                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>
+                  <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: isMobile ? '12px' : '13px' }}>
                     Full Name <span style={{ color: 'var(--gold)' }}>*</span>
                   </label>
                   <input
@@ -198,13 +203,12 @@ function HostLoginPage({ showToast }) {
                     placeholder="John Doe"
                     value={fullName}
                     onChange={e => setFullName(e.target.value)}
-                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)', padding: isMobile ? '12px' : '14px', fontSize: isMobile ? '14px' : '15px', width: '100%', borderRadius: '10px', border: '1px solid' }}
                   />
                 </div>
 
-                {/* Username - required */}
                 <div className="form-field">
-                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>
+                  <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: isMobile ? '12px' : '13px' }}>
                     Username <span style={{ color: 'var(--gold)' }}>*</span>
                   </label>
                   <input
@@ -212,16 +216,15 @@ function HostLoginPage({ showToast }) {
                     placeholder="john_doe"
                     value={username}
                     onChange={e => setUsername(e.target.value.toLowerCase().replace(/\s/g, '_'))}
-                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)', padding: isMobile ? '12px' : '14px', fontSize: isMobile ? '14px' : '15px', width: '100%', borderRadius: '10px', border: '1px solid' }}
                   />
-                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', marginTop: '4px' }}>
+                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: isMobile ? '10px' : '11px', marginTop: '4px' }}>
                     Only lowercase letters, numbers, and underscores
                   </p>
                 </div>
 
-                {/* Age - optional */}
                 <div className="form-field">
-                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Age</label>
+                  <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: isMobile ? '12px' : '13px' }}>Age</label>
                   <input
                     type="number"
                     placeholder="25"
@@ -229,28 +232,26 @@ function HostLoginPage({ showToast }) {
                     onChange={e => setAge(e.target.value)}
                     min="18"
                     max="120"
-                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)', padding: isMobile ? '12px' : '14px', fontSize: isMobile ? '14px' : '15px', width: '100%', borderRadius: '10px', border: '1px solid' }}
                   />
                 </div>
 
-                {/* Phone Number - optional with Algerian format */}
                 <div className="form-field">
-                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Phone Number</label>
+                  <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: isMobile ? '12px' : '13px' }}>Phone Number</label>
                   <input
                     type="tel"
                     placeholder="05XX XX XX XX"
                     value={numTele}
                     onChange={e => setNumTele(e.target.value)}
-                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)', padding: isMobile ? '12px' : '14px', fontSize: isMobile ? '14px' : '15px', width: '100%', borderRadius: '10px', border: '1px solid' }}
                   />
-                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', marginTop: '4px' }}>
+                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: isMobile ? '10px' : '11px', marginTop: '4px' }}>
                     Format: 05XXXXXXXX or +213XXXXXXXXX
                   </p>
                 </div>
 
-                {/* Wilaya (Algerian province) - optional */}
                 <div className="form-field">
-                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Wilaya (Province)</label>
+                  <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: isMobile ? '12px' : '13px' }}>Wilaya (Province)</label>
                   <select
                     value={wilaya}
                     onChange={e => setWilaya(e.target.value)}
@@ -259,9 +260,9 @@ function HostLoginPage({ showToast }) {
                       background: 'rgba(255,255,255,0.07)',
                       border: '1px solid rgba(201,168,76,0.2)',
                       borderRadius: '10px',
-                      padding: '14px 16px',
+                      padding: isMobile ? '12px' : '14px',
                       color: 'var(--white)',
-                      fontSize: '15px',
+                      fontSize: isMobile ? '14px' : '15px',
                       fontFamily: "'DM Sans', sans-serif",
                       cursor: 'pointer'
                     }}
@@ -273,9 +274,8 @@ function HostLoginPage({ showToast }) {
                   </select>
                 </div>
 
-                {/* Employment - optional */}
                 <div className="form-field">
-                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Employment Status</label>
+                  <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: isMobile ? '12px' : '13px' }}>Employment Status</label>
                   <select
                     value={emploi}
                     onChange={e => setEmploi(e.target.value)}
@@ -284,9 +284,9 @@ function HostLoginPage({ showToast }) {
                       background: 'rgba(255,255,255,0.07)',
                       border: '1px solid rgba(201,168,76,0.2)',
                       borderRadius: '10px',
-                      padding: '14px 16px',
+                      padding: isMobile ? '12px' : '14px',
                       color: 'var(--white)',
-                      fontSize: '15px',
+                      fontSize: isMobile ? '14px' : '15px',
                       fontFamily: "'DM Sans', sans-serif",
                       cursor: 'pointer'
                     }}
@@ -298,9 +298,8 @@ function HostLoginPage({ showToast }) {
                   </select>
                 </div>
 
-                {/* Security Question - optional */}
                 <div className="form-field">
-                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Security Question</label>
+                  <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: isMobile ? '12px' : '13px' }}>Security Question</label>
                   <textarea
                     placeholder="e.g., What was your first pet's name?"
                     value={secQst}
@@ -311,9 +310,9 @@ function HostLoginPage({ showToast }) {
                       background: 'rgba(255,255,255,0.07)',
                       border: '1px solid rgba(201,168,76,0.2)',
                       borderRadius: '10px',
-                      padding: '14px 16px',
+                      padding: isMobile ? '12px' : '14px',
                       color: 'var(--white)',
-                      fontSize: '15px',
+                      fontSize: isMobile ? '14px' : '15px',
                       fontFamily: "'DM Sans', sans-serif",
                       resize: 'vertical'
                     }}
@@ -324,7 +323,7 @@ function HostLoginPage({ showToast }) {
 
             {/* Email - required for both */}
             <div className="form-field">
-              <label style={{ color: 'rgba(255,255,255,0.7)' }}>
+              <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: isMobile ? '12px' : '13px' }}>
                 Email Address <span style={{ color: 'var(--gold)' }}>*</span>
               </label>
               <input
@@ -332,13 +331,13 @@ function HostLoginPage({ showToast }) {
                 placeholder="your@email.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)', padding: isMobile ? '12px' : '14px', fontSize: isMobile ? '14px' : '15px', width: '100%', borderRadius: '10px', border: '1px solid' }}
               />
             </div>
 
             {/* Password - required for both */}
             <div className="form-field">
-              <label style={{ color: 'rgba(255,255,255,0.7)' }}>
+              <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: isMobile ? '12px' : '13px' }}>
                 Password <span style={{ color: 'var(--gold)' }}>*</span>
               </label>
               <input
@@ -346,10 +345,10 @@ function HostLoginPage({ showToast }) {
                 placeholder="••••••••"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)', padding: isMobile ? '12px' : '14px', fontSize: isMobile ? '14px' : '15px', width: '100%', borderRadius: '10px', border: '1px solid' }}
               />
               {tab === 'signup' && (
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', marginTop: '4px' }}>
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: isMobile ? '10px' : '11px', marginTop: '4px' }}>
                   Password must be at least 6 characters
                 </p>
               )}
@@ -359,7 +358,7 @@ function HostLoginPage({ showToast }) {
               <div style={{ textAlign: 'right', marginTop: '-8px' }}>
                 <button type="button" style={{
                   background: 'none', border: 'none', color: 'var(--gold)',
-                  fontSize: '13px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", padding: 0
+                  fontSize: isMobile ? '12px' : '13px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", padding: 0
                 }} onClick={() => showToast('📧 Password reset email sent!')}>
                   Forgot password?
                 </button>
@@ -367,7 +366,7 @@ function HostLoginPage({ showToast }) {
             )}
 
             <button type="submit" className="btn-gold" style={{
-              width: '100%', padding: '16px', fontSize: '15px',
+              width: '100%', padding: isMobile ? '14px' : '16px', fontSize: isMobile ? '14px' : '15px',
               borderRadius: '12px', marginTop: '4px',
               opacity: loading ? 0.7 : 1, cursor: loading ? 'wait' : 'pointer'
             }} disabled={loading}>
@@ -376,16 +375,18 @@ function HostLoginPage({ showToast }) {
           </form>
 
           {/* Divider */}
-          <div className="form-divider" style={{ margin: '28px 0' }}>
-            <span style={{ color: 'rgba(255,255,255,0.4)' }}>or continue with</span>
+          <div className="form-divider" style={{ margin: isMobile ? '20px 0' : '28px 0', textAlign: 'center', position: 'relative' }}>
+            <span style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.04)', padding: '0 12px', fontSize: isMobile ? '12px' : '13px' }}>or continue with</span>
           </div>
 
           {/* Social */}
-          <div className="social-login">
+          <div className="social-login" style={{ display: 'flex', gap: '12px', flexDirection: isMobile ? 'column' : 'row' }}>
             {['🌐 Google', '🍎 Apple', '📘 Facebook'].map(p => (
               <button key={p} className="social-login-btn" style={{
                 background: 'rgba(255,255,255,0.06)', color: 'var(--white)',
-                border: '1px solid rgba(255,255,255,0.12)', flex: 1
+                border: '1px solid rgba(255,255,255,0.12)', flex: 1,
+                padding: isMobile ? '12px' : '14px', fontSize: isMobile ? '13px' : '14px',
+                borderRadius: '10px', cursor: 'pointer'
               }} onClick={() => handleSocial(p.split(' ')[1])} disabled={loading}>
                 {p}
               </button>
@@ -397,7 +398,7 @@ function HostLoginPage({ showToast }) {
         <div style={{ textAlign: 'center', marginTop: '28px' }}>
           <button style={{
             background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
-            fontSize: '13px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+            fontSize: isMobile ? '12px' : '13px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
             display: 'inline-flex', alignItems: 'center', gap: '6px', transition: 'color 0.3s'
           }}
             onClick={() => navigate('/host')}

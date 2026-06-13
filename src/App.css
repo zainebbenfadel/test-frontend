@@ -2479,3 +2479,20 @@ footer {
   border-bottom: 1px solid #eee;
   padding-bottom: 6px;
 }
+
+
+/* Add to your global CSS file */
+@media (max-width: 768px) {
+  .exp-grid {
+    grid-template-columns: 1fr !important;
+    padding: 0 16px !important;
+  }
+  
+  .exp-card {
+    margin: 0 0 20px 0 !important;
+  }
+  
+  .exp-img-wrap {
+    height: 200px !important;
+  }
+}

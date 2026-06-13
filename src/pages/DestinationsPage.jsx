@@ -2,6 +2,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+useEffect(() => {
+  const handleResize = () => setIsMobile(window.innerWidth <= 768);
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+
 const allAlgerianWilayas = [
   { name: 'Adrar', stays: '120', emoji: '🏜️', img: './photos/adrar.jpg' },
   { name: 'Chlef', stays: '85', emoji: '🌾', img: './photos/chlef.jpg' },
@@ -431,7 +439,7 @@ function DestinationsPage({ showToast }) {
       `}</style>
 
       {/* Hero */}
-      <div className="dest-page-hero">
+      <div className="dest-page-hero" style={{ paddingTop: isMobile ? '100px' : '140px' }}>
         <div className="section-eyebrow" style={{ justifyContent: 'center', color: 'var(--gold, #c9a84c)' }}>
           Explore Algeria
         </div>

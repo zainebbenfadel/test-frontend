@@ -65,11 +65,9 @@ function StaysPage({ showToast, onOpenBooking }) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  // Wishlist state: Set of offer_ids saved by the logged-in guest
   const [wishlistIds, setWishlistIds] = useState(new Set());
   const [wishlistLoading, setWishlistLoading] = useState({});
 
-  // Search state
   const [searchDestination, setSearchDestination] = useState('');
   const [checkInDate, setCheckInDate] = useState('');
   const [checkOutDate, setCheckOutDate] = useState('');
@@ -78,19 +76,30 @@ function StaysPage({ showToast, onOpenBooking }) {
   const [rentalType, setRentalType] = useState('day');
   const [searchPerformed, setSearchPerformed] = useState(false);
 
-  // Wilaya autocomplete state
   const [showWilayaDropdown, setShowWilayaDropdown] = useState(false);
   const [wilayaSuggestions, setWilayaSuggestions] = useState([]);
   const [highlightedWilaya, setHighlightedWilaya] = useState(-1);
   const destinationRef = useRef(null);
   const dropdownRef = useRef(null);
+  const searchContainerRef = useRef(null);
 
-  // Close dropdown on outside click
+  // Responsive state
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth <= 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      setIsTablet(window.innerWidth <= 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
-        destinationRef.current && !destinationRef.current.contains(e.target) &&
-        dropdownRef.current && !dropdownRef.current.contains(e.target)
+        searchContainerRef.current && !searchContainerRef.current.contains(e.target)
       ) {
         setShowWilayaDropdown(false);
         setHighlightedWilaya(-1);
@@ -100,7 +109,6 @@ function StaysPage({ showToast, onOpenBooking }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Load wishlist IDs when guest is logged in
   useEffect(() => {
     if (user && isGuest()) {
       getWishlistIds(user.user_id)
@@ -111,7 +119,6 @@ function StaysPage({ showToast, onOpenBooking }) {
     }
   }, [user]);
 
-  // Filter wilaya suggestions as user types
   const handleDestinationChange = (e) => {
     const val = e.target.value;
     setSearchDestination(val);
@@ -166,11 +173,9 @@ function StaysPage({ showToast, onOpenBooking }) {
     return 'year';
   };
 
-  // ✅ FIXED: Price is already in DZD, no multiplication needed
   const formatPrice = (price, rentalType) => {
-    const dzdPrice = price;
     const period = rentalType === 'day' ? 'night' : rentalType === 'month' ? 'month' : 'year';
-    return `${dzdPrice.toLocaleString('fr-DZ')} DA / ${period}`;
+    return `${price.toLocaleString('fr-DZ')} DA / ${period}`;
   };
 
   const getFirstImage = (property) => {
@@ -337,28 +342,39 @@ function StaysPage({ showToast, onOpenBooking }) {
   return (
     <>
       {/* Page Hero with Search Bar */}
-      <div style={{ background: 'white', borderBottom: '1px solid #e0e0e0', paddingTop: '100px', paddingBottom: '30px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 40px' }}>
-          {/* Search Bar */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: 'white',
-            borderRadius: '48px',
-            border: '1px solid #e0e0e0',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            overflow: 'visible',
-            maxWidth: '900px',
-            margin: '0 auto',
-            position: 'relative',
-            zIndex: 50,
-          }}>
+      <div style={{ background: 'white', borderBottom: '1px solid #e0e0e0', paddingTop: isMobile ? '80px' : '100px', paddingBottom: isMobile ? '20px' : '30px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '0 16px' : '0 40px' }}>
+          
+          {/* Search Bar Container */}
+          <div
+            ref={searchContainerRef}
+            style={{
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: 'stretch',
+              background: 'white',
+              borderRadius: isMobile ? '24px' : '48px',
+              border: '1px solid #e0e0e0',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              overflow: 'visible',
+              maxWidth: isMobile ? '100%' : '900px',
+              margin: '0 auto',
+              position: 'relative',
+              zIndex: 50,
+            }}
+          >
             {/* Destination Field */}
             <div
               ref={destinationRef}
-              style={{ flex: 1.5, padding: '14px 20px', borderRight: '1px solid #e0e0e0', position: 'relative' }}
+              style={{
+                flex: 1.5,
+                padding: isMobile ? '12px 16px' : '14px 20px',
+                borderRight: isMobile ? 'none' : '1px solid #e0e0e0',
+                borderBottom: isMobile ? '1px solid #e0e0e0' : 'none',
+                position: 'relative'
+              }}
             >
-              <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>Where</div>
+              <div style={{ fontSize: isMobile ? '11px' : '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>Where</div>
               <input
                 type="text"
                 placeholder="Search destinations"
@@ -372,7 +388,7 @@ function StaysPage({ showToast, onOpenBooking }) {
                   width: '100%',
                   border: 'none',
                   outline: 'none',
-                  fontSize: '14px',
+                  fontSize: isMobile ? '16px' : '14px',
                   background: 'transparent',
                   fontFamily: 'inherit',
                   color: '#333',
@@ -386,8 +402,8 @@ function StaysPage({ showToast, onOpenBooking }) {
                   style={{
                     position: 'absolute',
                     top: 'calc(100% + 8px)',
-                    left: '-1px',
-                    width: '300px',
+                    left: '0',
+                    right: '0',
                     background: 'white',
                     borderRadius: '16px',
                     border: '1px solid #e0e0e0',
@@ -395,10 +411,11 @@ function StaysPage({ showToast, onOpenBooking }) {
                     maxHeight: '280px',
                     overflowY: 'auto',
                     zIndex: 200,
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: '#c9a84c #f5f5f5',
                   }}
                 >
+                  <div style={{ padding: '10px 16px', background: '#f9f6f0', borderBottom: '1px solid #e0e0e0', fontSize: '12px', color: '#666', fontWeight: 500, position: 'sticky', top: 0 }}>
+                    📍 Select a wilaya
+                  </div>
                   {wilayaSuggestions.map((wilaya, index) => {
                     const isHighlighted = index === highlightedWilaya;
                     const termLower = searchDestination.toLowerCase();
@@ -417,7 +434,6 @@ function StaysPage({ showToast, onOpenBooking }) {
                           cursor: 'pointer',
                           background: isHighlighted ? 'rgba(201,168,76,0.08)' : 'transparent',
                           borderBottom: index < wilayaSuggestions.length - 1 ? '1px solid #f0f0f0' : 'none',
-                          borderRadius: index === wilayaSuggestions.length - 1 ? '0 0 16px 16px' : '0',
                           transition: 'background 0.1s',
                         }}
                       >
@@ -425,7 +441,7 @@ function StaysPage({ showToast, onOpenBooking }) {
                           width: '32px', height: '32px', borderRadius: '8px',
                           background: 'rgba(201,168,76,0.1)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: '15px', flexShrink: 0,
+                          fontSize: '16px', flexShrink: 0,
                         }}>
                           {wilaya.emoji}
                         </span>
@@ -440,20 +456,30 @@ function StaysPage({ showToast, onOpenBooking }) {
                             </>
                           )}
                         </span>
-                        <svg style={{ marginLeft: 'auto', flexShrink: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isHighlighted ? '#c9a84c' : '#ccc'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg style={{ marginLeft: 'auto', flexShrink: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isHighlighted ? '#c9a84c' : '#ccc'} strokeWidth="2">
                           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                           <circle cx="12" cy="10" r="3"/>
                         </svg>
                       </div>
                     );
                   })}
+                  {wilayaSuggestions.length === 0 && (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
+                      No wilayas found matching "{searchDestination}"
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
             {/* Check In Field */}
-            <div style={{ flex: 1, padding: '14px 20px', borderRight: '1px solid #e0e0e0' }}>
-              <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>Check in</div>
+            <div style={{
+              flex: 1,
+              padding: isMobile ? '12px 16px' : '14px 20px',
+              borderRight: isMobile ? 'none' : '1px solid #e0e0e0',
+              borderBottom: isMobile ? '1px solid #e0e0e0' : 'none',
+            }}>
+              <div style={{ fontSize: isMobile ? '11px' : '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>Check in</div>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <input
                   type="date"
@@ -461,13 +487,19 @@ function StaysPage({ showToast, onOpenBooking }) {
                   onChange={(e) => setCheckInDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
                   style={{
-                    width: '100%', border: 'none', outline: 'none', fontSize: '14px',
-                    background: 'transparent', fontFamily: 'inherit', color: '#333',
-                    opacity: checkInDate ? 1 : 0, cursor: 'pointer',
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    fontSize: isMobile ? '16px' : '14px',
+                    background: 'transparent',
+                    fontFamily: 'inherit',
+                    color: '#333',
+                    opacity: checkInDate ? 1 : 0,
+                    cursor: 'pointer',
                   }}
                 />
                 {!checkInDate && (
-                  <span style={{ position: 'absolute', left: 0, color: '#999', fontSize: '14px', pointerEvents: 'none' }}>
+                  <span style={{ position: 'absolute', left: 0, color: '#999', fontSize: isMobile ? '14px' : '14px', pointerEvents: 'none' }}>
                     Add date
                   </span>
                 )}
@@ -482,8 +514,13 @@ function StaysPage({ showToast, onOpenBooking }) {
             </div>
 
             {/* Check Out Field */}
-            <div style={{ flex: 1, padding: '14px 20px', borderRight: '1px solid #e0e0e0' }}>
-              <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>Check out</div>
+            <div style={{
+              flex: 1,
+              padding: isMobile ? '12px 16px' : '14px 20px',
+              borderRight: isMobile ? 'none' : '1px solid #e0e0e0',
+              borderBottom: isMobile ? '1px solid #e0e0e0' : 'none',
+            }}>
+              <div style={{ fontSize: isMobile ? '11px' : '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>Check out</div>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <input
                   type="date"
@@ -491,13 +528,19 @@ function StaysPage({ showToast, onOpenBooking }) {
                   onChange={(e) => setCheckOutDate(e.target.value)}
                   min={checkInDate || new Date().toISOString().split('T')[0]}
                   style={{
-                    width: '100%', border: 'none', outline: 'none', fontSize: '14px',
-                    background: 'transparent', fontFamily: 'inherit', color: '#333',
-                    opacity: checkOutDate ? 1 : 0, cursor: 'pointer',
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    fontSize: isMobile ? '16px' : '14px',
+                    background: 'transparent',
+                    fontFamily: 'inherit',
+                    color: '#333',
+                    opacity: checkOutDate ? 1 : 0,
+                    cursor: 'pointer',
                   }}
                 />
                 {!checkOutDate && (
-                  <span style={{ position: 'absolute', left: 0, color: '#999', fontSize: '14px', pointerEvents: 'none' }}>
+                  <span style={{ position: 'absolute', left: 0, color: '#999', fontSize: isMobile ? '14px' : '14px', pointerEvents: 'none' }}>
                     Add date
                   </span>
                 )}
@@ -512,8 +555,12 @@ function StaysPage({ showToast, onOpenBooking }) {
             </div>
 
             {/* Guests Field */}
-            <div style={{ flex: 1, padding: '14px 20px', borderRight: '1px solid #e0e0e0' }}>
-              <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>Guests</div>
+            <div style={{
+              flex: 1,
+              padding: isMobile ? '12px 16px' : '14px 20px',
+              borderRight: isMobile ? 'none' : '1px solid #e0e0e0',
+            }}>
+              <div style={{ fontSize: isMobile ? '11px' : '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>Guests</div>
               <input
                 type="number"
                 placeholder="Add guests"
@@ -521,8 +568,13 @@ function StaysPage({ showToast, onOpenBooking }) {
                 onChange={(e) => setGuestCount(e.target.value)}
                 min="1"
                 style={{
-                  width: '100%', border: 'none', outline: 'none', fontSize: '14px',
-                  background: 'transparent', fontFamily: 'inherit', color: '#333',
+                  width: '100%',
+                  border: 'none',
+                  outline: 'none',
+                  fontSize: isMobile ? '16px' : '14px',
+                  background: 'transparent',
+                  fontFamily: 'inherit',
+                  color: '#333',
                 }}
               />
             </div>
@@ -531,10 +583,18 @@ function StaysPage({ showToast, onOpenBooking }) {
             <button
               onClick={performSearch}
               style={{
-                background: '#c9a84c', border: 'none', borderRadius: '40px',
-                width: '48px', height: '48px', margin: '8px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', transition: 'background 0.2s ease', flexShrink: 0,
+                background: '#c9a84c',
+                border: 'none',
+                borderRadius: isMobile ? '40px' : '40px',
+                width: isMobile ? 'calc(100% - 16px)' : '48px',
+                height: isMobile ? '44px' : '48px',
+                margin: isMobile ? '8px' : '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'background 0.2s ease',
+                flexShrink: 0,
               }}
               onMouseEnter={(e) => e.currentTarget.style.background = '#b8963e'}
               onMouseLeave={(e) => e.currentTarget.style.background = '#c9a84c'}
@@ -548,11 +608,11 @@ function StaysPage({ showToast, onOpenBooking }) {
 
           {/* Search Summary */}
           {searchPerformed && searchDestination && (
-            <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: '#666' }}>
+            <div style={{ textAlign: 'center', marginTop: isMobile ? '16px' : '20px', fontSize: isMobile ? '12px' : '13px', color: '#666' }}>
               <span>🔍 {listings.length} property(s) found in <strong>{searchDestination}</strong></span>
-              {numberOfDays > 0 && <span style={{ marginLeft: '15px' }}>📅 {numberOfDays} days ({rentalType} rate)</span>}
-              {guestCount && <span style={{ marginLeft: '15px' }}>👥 {guestCount} guest(s)</span>}
-              <button onClick={clearSearch} style={{ marginLeft: '15px', background: 'none', border: 'none', color: '#c9a84c', cursor: 'pointer', textDecoration: 'underline' }}>
+              {numberOfDays > 0 && <span style={{ marginLeft: isMobile ? '8px' : '15px', display: isMobile ? 'block' : 'inline', marginTop: isMobile ? '8px' : 0 }}>📅 {numberOfDays} days ({rentalType} rate)</span>}
+              {guestCount && <span style={{ marginLeft: isMobile ? '8px' : '15px', display: isMobile ? 'block' : 'inline', marginTop: isMobile ? '8px' : 0 }}>👥 {guestCount} guest(s)</span>}
+              <button onClick={clearSearch} style={{ marginLeft: isMobile ? '8px' : '15px', background: 'none', border: 'none', color: '#c9a84c', cursor: 'pointer', textDecoration: 'underline', display: isMobile ? 'inline-block' : 'inline' }}>
                 Clear
               </button>
             </div>
@@ -561,8 +621,17 @@ function StaysPage({ showToast, onOpenBooking }) {
       </div>
 
       {/* Category Filters */}
-      <div style={{ background: 'white', padding: '20px 40px 0', borderBottom: '1px solid #e0e0e0' }}>
-        <div style={{ display: 'flex', gap: '24px', overflowX: 'auto', maxWidth: '1200px', margin: '0 auto', justifyContent: 'center' }}>
+      <div style={{ background: 'white', padding: isMobile ? '16px 16px 0' : '20px 40px 0', borderBottom: '1px solid #e0e0e0' }}>
+        <div style={{
+          display: 'flex',
+          gap: isMobile ? '16px' : '24px',
+          overflowX: 'auto',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          justifyContent: isMobile ? 'flex-start' : 'center',
+          WebkitOverflowScrolling: 'touch',
+          paddingBottom: isMobile ? '8px' : '0'
+        }}>
           {[
             { value: 'all', label: 'All Properties' },
             { value: 'Touristic', label: '🌍 Touristic' },
@@ -572,13 +641,13 @@ function StaysPage({ showToast, onOpenBooking }) {
               key={cat.value}
               onClick={() => filterCategory(cat.value)}
               style={{
-                padding: '8px 0',
+                padding: isMobile ? '8px 0' : '8px 0',
                 background: 'transparent',
                 color: activeCategory === cat.value ? '#c9a84c' : '#666',
                 border: 'none',
                 borderBottom: activeCategory === cat.value ? '2px solid #c9a84c' : '2px solid transparent',
                 cursor: 'pointer',
-                fontSize: '14px',
+                fontSize: isMobile ? '13px' : '14px',
                 fontWeight: 500,
                 transition: 'all 0.2s',
                 whiteSpace: 'nowrap'
@@ -591,14 +660,14 @@ function StaysPage({ showToast, onOpenBooking }) {
       </div>
 
       {/* Listings Grid */}
-      <section id="stays" style={{ background: '#f5f5f5', paddingTop: '40px', paddingBottom: '60px' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 40px' }}>
+      <section id="stays" style={{ background: '#f5f5f5', paddingTop: isMobile ? '24px' : '40px', paddingBottom: isMobile ? '40px' : '60px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: isMobile ? '0 16px' : '0 40px' }}>
           {listings.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '80px', color: '#999' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏠</div>
-              <h3>No properties found</h3>
-              <p style={{ marginTop: '8px' }}>Try adjusting your search criteria</p>
-              <button onClick={clearSearch} style={{ marginTop: '20px', padding: '10px 24px', background: '#c9a84c', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+            <div style={{ textAlign: 'center', padding: isMobile ? '40px 20px' : '80px', color: '#999' }}>
+              <div style={{ fontSize: isMobile ? '40px' : '48px', marginBottom: '16px' }}>🏠</div>
+              <h3 style={{ fontSize: isMobile ? '18px' : '20px' }}>No properties found</h3>
+              <p style={{ marginTop: '8px', fontSize: isMobile ? '13px' : '14px' }}>Try adjusting your search criteria</p>
+              <button onClick={clearSearch} style={{ marginTop: '20px', padding: isMobile ? '10px 20px' : '10px 24px', background: '#c9a84c', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
                 Start New Search
               </button>
             </div>
@@ -611,9 +680,13 @@ function StaysPage({ showToast, onOpenBooking }) {
                 return groups;
               }, {})
             ).map(([groupName, items]) => (
-              <div key={groupName} style={{ marginBottom: '40px' }}>
-                <h2 style={{ fontSize: '22px', fontWeight: 600, color: '#222', marginBottom: '20px' }}>{groupName}</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+              <div key={groupName} style={{ marginBottom: isMobile ? '32px' : '40px' }}>
+                <h2 style={{ fontSize: isMobile ? '20px' : '22px', fontWeight: 600, color: '#222', marginBottom: isMobile ? '16px' : '20px' }}>{groupName}</h2>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(280px, 1fr))'),
+                  gap: isMobile ? '20px' : '24px'
+                }}>
                   {items.map(l => {
                     const isSaved = wishlistIds.has(l.property_id);
                     const isLoadingHeart = wishlistLoading[l.property_id];
@@ -621,16 +694,19 @@ function StaysPage({ showToast, onOpenBooking }) {
                       <div
                         key={l.property_id}
                         style={{
-                          cursor: 'pointer', background: 'white', borderRadius: '12px', overflow: 'hidden',
-                          transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                          cursor: 'pointer',
+                          background: 'white',
+                          borderRadius: '12px',
+                          overflow: 'hidden',
+                          transition: 'transform 0.2s, box-shadow 0.2s',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                         }}
                         onClick={() => navigate(`/property/${l.property_id}`)}
-                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'; }}
                       >
                         <div style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3', overflow: 'hidden' }}>
                           <img
-                            src={getFirstImage(l)} alt={l.title}
+                            src={getFirstImage(l)}
+                            alt={l.title}
                             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                             onError={(e) => { e.target.src = 'https://picsum.photos/id/104/600/450'; }}
                           />
@@ -645,7 +721,6 @@ function StaysPage({ showToast, onOpenBooking }) {
                             </div>
                           )}
 
-                          {/* Heart / Wishlist Button */}
                           <button
                             onClick={(e) => toggleWishlist(e, l.offer_id ?? l.property_id)}
                             disabled={isLoadingHeart}
@@ -662,8 +737,6 @@ function StaysPage({ showToast, onOpenBooking }) {
                               backdropFilter: 'blur(4px)',
                               padding: 0,
                             }}
-                            onMouseEnter={e => { if (!isLoadingHeart) e.currentTarget.style.transform = 'scale(1.15)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
                           >
                             <svg width="18" height="18" viewBox="0 0 32 32" fill={isSaved ? '#e63946' : 'none'}>
                               <path
@@ -675,18 +748,18 @@ function StaysPage({ showToast, onOpenBooking }) {
                           </button>
                         </div>
 
-                        <div style={{ padding: '12px' }}>
+                        <div style={{ padding: isMobile ? '12px' : '12px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
-                            <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#222', margin: 0 }}>{l.title}</h3>
-                            <div style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <h3 style={{ fontSize: isMobile ? '14px' : '15px', fontWeight: 600, color: '#222', margin: 0, flex: 1 }}>{l.title}</h3>
+                            <div style={{ fontSize: isMobile ? '12px' : '13px', display: 'flex', alignItems: 'center', gap: '4px', marginLeft: '8px' }}>
                               <span>★</span> {l.avgRating?.toFixed(1) || 'New'}
                             </div>
                           </div>
-                          <p style={{ fontSize: '13px', color: '#717171', margin: '0 0 4px 0' }}>{l.wilaya || l.location}</p>
-                          <p style={{ fontSize: '12px', color: '#999', margin: '0 0 8px 0' }}>
+                          <p style={{ fontSize: isMobile ? '12px' : '13px', color: '#717171', margin: '0 0 4px 0' }}>{l.wilaya || l.location}</p>
+                          <p style={{ fontSize: isMobile ? '11px' : '12px', color: '#999', margin: '0 0 8px 0' }}>
                             🛏️ {l.chambres || '?'} bed • 🚿 {l.salle_de_bain || '?'} bath • 👥 {l.voyageurs || '?'} guests
                           </p>
-                          <div style={{ fontWeight: 600, color: '#222', fontSize: '14px' }}>
+                          <div style={{ fontWeight: 600, color: '#222', fontSize: isMobile ? '13px' : '14px' }}>
                             {formatPrice(l.price, l.rental_type)}
                           </div>
                         </div>
