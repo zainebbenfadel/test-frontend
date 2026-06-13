@@ -1,0 +1,415 @@
+// src/pages/HostLoginPage.jsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+function HostLoginPage({ showToast }) {
+  const navigate = useNavigate();
+  const { hostLogin, hostSignup } = useAuth();
+  const [tab, setTab] = useState('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
+  const [age, setAge] = useState('');
+  const [numTele, setNumTele] = useState('');
+  const [wilaya, setWilaya] = useState('');
+  const [emploi, setEmploi] = useState('');
+  const [secQst, setSecQst] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Algerian wilayas list
+  const algerianWilayas = [
+    'Adrar', 'Chlef', 'Laghouat', 'Oum El Bouaghi', 'Batna', 'Béjaïa', 'Biskra', 'Béchar',
+    'Blida', 'Bouira', 'Tamanrasset', 'Tébessa', 'Tlemcen', 'Tiaret', 'Tizi Ouzou', 'Alger',
+    'Djelfa', 'Jijel', 'Sétif', 'Saïda', 'Skikda', 'Sidi Bel Abbès', 'Annaba', 'Guelma',
+    'Constantine', 'Médéa', 'Mostaganem', 'M’Sila', 'Mascara', 'Ouargla', 'Oran', 'El Bayadh',
+    'Illizi', 'Bordj Bou Arréridj', 'Boumerdès', 'El Tarf', 'Tindouf', 'Tissemsilt', 'El Oued',
+    'Khenchela', 'Souk Ahras', 'Tipaza', 'Mila', 'Aïn Defla', 'Naâma', 'Aïn Témouchent',
+    'Ghardaïa', 'Relizane'
+  ];
+
+  // Employment options
+  const employmentOptions = [
+    'Student', 'Employed Full-time', 'Employed Part-time', 'Self-employed',
+    'Business Owner', 'Freelancer', 'Homemaker', 'Retired', 'Unemployed', 'Other'
+  ];
+
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
+  // Single unified submit handler
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (tab === 'signin') {
+      // Sign in validation
+      if (!email || !password) { 
+        showToast('⚠️ Please fill in all fields.'); 
+        return; 
+      }
+      
+      setLoading(true);
+      try {
+        await hostLogin({ email, password });
+        showToast('✨ Welcome back! Redirecting to dashboard...');
+        // Navigate to dashboard immediately after successful login
+        navigate('/host-dashboard');
+      } catch (err) {
+        showToast(`❌ ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Sign up validation
+      if (!fullName || !email || !password || !username) { 
+        showToast('⚠️ Please fill in all required fields (*).'); 
+        return; 
+      }
+      if (age && (age < 18 || age > 120)) {
+        showToast('⚠️ Age must be between 18 and 120.');
+        return;
+      }
+      if (numTele && !/^(\+?213|0)?[5-7]\d{8}$/.test(numTele.replace(/\s/g, ''))) {
+        showToast('⚠️ Please enter a valid Algerian phone number.');
+        return;
+      }
+      
+      setLoading(true);
+      try {
+        const signupData = {
+          full_name: fullName,
+          email,
+          password,
+          username,
+          age: age ? parseInt(age) : null,
+          num_tele: numTele || null,
+          wilaya: wilaya || null,
+          emploi: emploi || null,
+          sec_qst: secQst || null
+        };
+        
+        await hostSignup(signupData);
+        showToast('✨ Account created! Please sign in.');
+        // Reset form and switch to signin
+        setFullName('');
+        setEmail('');
+        setPassword('');
+        setUsername('');
+        setAge('');
+        setNumTele('');
+        setWilaya('');
+        setEmploi('');
+        setSecQst('');
+        setTab('signin');
+      } catch (err) {
+        showToast(`❌ ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleSocial = (provider) => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      showToast(`✨ Signed in with ${provider}! Redirecting to dashboard...`);
+      navigate('/host-dashboard');
+    }, 1000);
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'var(--navy)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '120px 24px 60px',
+      position: 'relative',
+      overflow: 'auto'
+    }}>
+      <div style={{
+        position: 'absolute', top: '-200px', right: '-200px',
+        width: '600px', height: '600px',
+        background: 'radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%)',
+        pointerEvents: 'none'
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '-150px', left: '-150px',
+        width: '500px', height: '500px',
+        background: 'radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%)',
+        pointerEvents: 'none'
+      }} />
+
+      <div style={{ width: '100%', maxWidth: '520px', position: 'relative', zIndex: 1 }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <div className="section-eyebrow" style={{ justifyContent: 'center', color: 'var(--gold)', marginBottom: '16px' }}>
+            Host Portal
+          </div>
+          <h1 style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 'clamp(32px, 5vw, 44px)',
+            fontWeight: 600, color: 'var(--white)', lineHeight: 1.1, marginBottom: '12px'
+          }}>
+            {tab === 'signin' ? 'Welcome Back,' : 'Join as a'}<br />
+            <em style={{ color: 'var(--gold-light)' }}> Host</em>
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', lineHeight: 1.6, fontFamily: "'DM Sans', sans-serif" }}>
+            {tab === 'signin'
+              ? 'Sign in to access your host dashboard and listing tools.'
+              : 'Create your account and start earning from your space.'}
+          </p>
+        </div>
+
+        {/* Card */}
+        <div style={{
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(201,168,76,0.15)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '40px',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 40px 80px rgba(0,0,0,0.4)'
+        }}>
+          {/* Tabs */}
+          <div className="modal-tabs" style={{ marginBottom: '32px' }}>
+            <button className={`modal-tab ${tab === 'signin' ? 'active' : ''}`} onClick={() => setTab('signin')}>
+              Sign In
+            </button>
+            <button className={`modal-tab ${tab === 'signup' ? 'active' : ''}`} onClick={() => setTab('signup')}>
+              Create Account
+            </button>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+            {/* Signup-only fields - matching users table */}
+            {tab === 'signup' && (
+              <>
+                {/* Full Name - required */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>
+                    Full Name <span style={{ color: 'var(--gold)' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="John Doe"
+                    value={fullName}
+                    onChange={e => setFullName(e.target.value)}
+                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                  />
+                </div>
+
+                {/* Username - required */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>
+                    Username <span style={{ color: 'var(--gold)' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="john_doe"
+                    value={username}
+                    onChange={e => setUsername(e.target.value.toLowerCase().replace(/\s/g, '_'))}
+                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                  />
+                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', marginTop: '4px' }}>
+                    Only lowercase letters, numbers, and underscores
+                  </p>
+                </div>
+
+                {/* Age - optional */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Age</label>
+                  <input
+                    type="number"
+                    placeholder="25"
+                    value={age}
+                    onChange={e => setAge(e.target.value)}
+                    min="18"
+                    max="120"
+                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                  />
+                </div>
+
+                {/* Phone Number - optional with Algerian format */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Phone Number</label>
+                  <input
+                    type="tel"
+                    placeholder="05XX XX XX XX"
+                    value={numTele}
+                    onChange={e => setNumTele(e.target.value)}
+                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                  />
+                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', marginTop: '4px' }}>
+                    Format: 05XXXXXXXX or +213XXXXXXXXX
+                  </p>
+                </div>
+
+                {/* Wilaya (Algerian province) - optional */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Wilaya (Province)</label>
+                  <select
+                    value={wilaya}
+                    onChange={e => setWilaya(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: 'rgba(255,255,255,0.07)',
+                      border: '1px solid rgba(201,168,76,0.2)',
+                      borderRadius: '10px',
+                      padding: '14px 16px',
+                      color: 'var(--white)',
+                      fontSize: '15px',
+                      fontFamily: "'DM Sans', sans-serif",
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="" style={{ background: 'var(--navy)' }}>Select your wilaya</option>
+                    {algerianWilayas.map(w => (
+                      <option key={w} value={w} style={{ background: 'var(--navy)' }}>{w}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Employment - optional */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Employment Status</label>
+                  <select
+                    value={emploi}
+                    onChange={e => setEmploi(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: 'rgba(255,255,255,0.07)',
+                      border: '1px solid rgba(201,168,76,0.2)',
+                      borderRadius: '10px',
+                      padding: '14px 16px',
+                      color: 'var(--white)',
+                      fontSize: '15px',
+                      fontFamily: "'DM Sans', sans-serif",
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="" style={{ background: 'var(--navy)' }}>Select employment status</option>
+                    {employmentOptions.map(opt => (
+                      <option key={opt} value={opt} style={{ background: 'var(--navy)' }}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Security Question - optional */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Security Question</label>
+                  <textarea
+                    placeholder="e.g., What was your first pet's name?"
+                    value={secQst}
+                    onChange={e => setSecQst(e.target.value)}
+                    rows={2}
+                    style={{
+                      width: '100%',
+                      background: 'rgba(255,255,255,0.07)',
+                      border: '1px solid rgba(201,168,76,0.2)',
+                      borderRadius: '10px',
+                      padding: '14px 16px',
+                      color: 'var(--white)',
+                      fontSize: '15px',
+                      fontFamily: "'DM Sans', sans-serif",
+                      resize: 'vertical'
+                    }}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Email - required for both */}
+            <div className="form-field">
+              <label style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Email Address <span style={{ color: 'var(--gold)' }}>*</span>
+              </label>
+              <input
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+              />
+            </div>
+
+            {/* Password - required for both */}
+            <div className="form-field">
+              <label style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Password <span style={{ color: 'var(--gold)' }}>*</span>
+              </label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+              />
+              {tab === 'signup' && (
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', marginTop: '4px' }}>
+                  Password must be at least 6 characters
+                </p>
+              )}
+            </div>
+
+            {tab === 'signin' && (
+              <div style={{ textAlign: 'right', marginTop: '-8px' }}>
+                <button type="button" style={{
+                  background: 'none', border: 'none', color: 'var(--gold)',
+                  fontSize: '13px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", padding: 0
+                }} onClick={() => showToast('📧 Password reset email sent!')}>
+                  Forgot password?
+                </button>
+              </div>
+            )}
+
+            <button type="submit" className="btn-gold" style={{
+              width: '100%', padding: '16px', fontSize: '15px',
+              borderRadius: '12px', marginTop: '4px',
+              opacity: loading ? 0.7 : 1, cursor: loading ? 'wait' : 'pointer'
+            }} disabled={loading}>
+              {loading ? 'Please wait…' : tab === 'signin' ? 'Sign In & Continue' : 'Create Account'}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="form-divider" style={{ margin: '28px 0' }}>
+            <span style={{ color: 'rgba(255,255,255,0.4)' }}>or continue with</span>
+          </div>
+
+          {/* Social */}
+          <div className="social-login">
+            {['🌐 Google', '🍎 Apple', '📘 Facebook'].map(p => (
+              <button key={p} className="social-login-btn" style={{
+                background: 'rgba(255,255,255,0.06)', color: 'var(--white)',
+                border: '1px solid rgba(255,255,255,0.12)', flex: 1
+              }} onClick={() => handleSocial(p.split(' ')[1])} disabled={loading}>
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Back link */}
+        <div style={{ textAlign: 'center', marginTop: '28px' }}>
+          <button style={{
+            background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
+            fontSize: '13px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+            display: 'inline-flex', alignItems: 'center', gap: '6px', transition: 'color 0.3s'
+          }}
+            onClick={() => navigate('/host')}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--gold)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+          >
+            ← Back to Host page
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default HostLoginPage;
