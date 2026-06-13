@@ -5,49 +5,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 
-// Add this to ExperiencesPage.jsx component
-// At the top after imports, add the responsive styles:
-
-useEffect(() => {
-  // Add responsive styles
-  const style = document.createElement('style');
-  style.textContent = `
-    @media (max-width: 768px) {
-      .exp-grid {
-        grid-template-columns: 1fr !important;
-        padding: 0 16px !important;
-      }
-      .exp-card {
-        margin: 0 0 20px 0 !important;
-      }
-      .exp-img-wrap {
-        height: 200px !important;
-      }
-      .exp-title {
-        font-size: 16px !important;
-      }
-      .exp-info {
-        padding: 16px !important;
-      }
-      .category-buttons {
-        gap: 8px !important;
-        padding: 0 16px !important;
-      }
-      .category-btn {
-        padding: 8px 16px !important;
-        font-size: 12px !important;
-      }
-    }
-    @media (min-width: 769px) and (max-width: 1024px) {
-      .exp-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-      }
-    }
-  `;
-  document.head.appendChild(style);
-  return () => document.head.removeChild(style);
-}, []);
-
 const allExperiences = [
   {
     title: 'Casbah Walking Tour',
