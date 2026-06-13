@@ -1,5 +1,5 @@
 // src/services/messagedAPI.js
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://test-backend-hd6i.onrender.com';
 
 export const getOrCreateConversation = async (guest_id, host_id, property_id) => {
   const response = await fetch(`${API_BASE}/api/messages/conversations`, {  // ✅ Added /api

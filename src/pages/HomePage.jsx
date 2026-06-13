@@ -19,7 +19,7 @@ function HomePage({ showToast }) {
     try {
       setLoadingPopular(true);
       
-      const response = await fetch('http://localhost:5000/api/properties');
+      const response = await fetch('https://test-backend-hd6i.onrender.com/api/properties');
       
       if (response.ok) {
         const properties = await response.json();

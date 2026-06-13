@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const API = 'http://localhost:5000/api/admin'
+const API = 'https://test-backend-hd6i.onrender.com/api/admin'
 
 
 

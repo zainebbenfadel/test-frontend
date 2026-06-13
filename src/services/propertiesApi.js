@@ -1,5 +1,5 @@
 // src/services/propertiesApi.js
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://test-backend-hd6i.onrender.com';
 
 export const fetchProperties = async () => {
   try {

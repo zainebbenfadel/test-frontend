@@ -7,7 +7,7 @@ import {
   XAxis, YAxis, Tooltip, Legend, CartesianGrid
 } from 'recharts';
 
-const API = 'http://localhost:5000/api/admin'
+const API = 'https://test-backend-hd6i.onrender.com/api/admin'
 
 const STATUS_COLORS = ['#c9a84c', '#1e3356', '#8a8070'];
 const TYPE_COLORS   = ['#c9a84c', '#13213a', '#d4cfc4'];

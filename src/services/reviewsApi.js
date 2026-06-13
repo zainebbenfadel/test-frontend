@@ -1,5 +1,5 @@
 // src/services/reviewsApi.js
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://test-backend-hd6i.onrender.com';
 
 // Get all reviews for a property
 export const getReviews = async (propertyId) => {

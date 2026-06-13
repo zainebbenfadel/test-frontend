@@ -30,7 +30,7 @@ function HostPropertyDetailPage({ showToast }) {
       }
 
       // Fetch property details
-      const propertyResponse = await fetch(`http://localhost:5000/api/host/properties/${id}?host_id=${host.host_id}`);
+      const propertyResponse = await fetch(`https://test-backend-hd6i.onrender.com/api/host/properties/${id}?host_id=${host.host_id}`);
       
       if (propertyResponse.ok) {
         const propertyData = await propertyResponse.json();
@@ -46,7 +46,7 @@ function HostPropertyDetailPage({ showToast }) {
       }
 
       // Fetch reviews for this property
-      const reviewsResponse = await fetch(`http://localhost:5000/api/properties/${id}/reviews`);
+      const reviewsResponse = await fetch(`https://test-backend-hd6i.onrender.com/api/properties/${id}/reviews`);
       if (reviewsResponse.ok) {
         const reviewsData = await reviewsResponse.json();
         setReviews(reviewsData);

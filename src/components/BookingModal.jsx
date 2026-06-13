@@ -15,7 +15,7 @@ const nights = (a, b) => (!a || !b) ? 0 : Math.max(0, Math.floor((new Date(b) - 
 const fmt = n => Number(n).toLocaleString('fr-DZ');
 const remind = d => { const dt = new Date(d); dt.setDate(dt.getDate() - 3); return dt.toISOString().split('T')[0]; };
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://test-backend-hd6i.onrender.com';
 
 export default function BookingModal({ 
   listing, 

@@ -95,7 +95,7 @@ function HostDashboard({ showToast }) {
       const host = JSON.parse(localStorage.getItem('host_user'));
       if (!host) return;
       
-      const response = await fetch(`http://localhost:5000/api/hosts/${host.host_id}/profile`);
+      const response = await fetch(`https://test-backend-hd6i.onrender.com/api/hosts/${host.host_id}/profile`);
       if (response.ok) {
         const data = await response.json();
         setHostProfile(data);
@@ -149,7 +149,7 @@ function HostDashboard({ showToast }) {
     formData.append('image', profileImageFile);
     
     try {
-      const response = await fetch('http://localhost:5000/api/upload/profile-image', {
+      const response = await fetch('https://test-backend-hd6i.onrender.com/api/upload/profile-image', {
         method: 'POST',
         body: formData
       });
@@ -181,7 +181,7 @@ function HostDashboard({ showToast }) {
         }
       }
       
-      const response = await fetch(`http://localhost:5000/api/hosts/${host.host_id}/profile`, {
+      const response = await fetch(`https://test-backend-hd6i.onrender.com/api/hosts/${host.host_id}/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -216,7 +216,7 @@ function HostDashboard({ showToast }) {
     try {
       const host = JSON.parse(localStorage.getItem('host_user'));
       if (!host) return;
-      const response = await fetch(`http://localhost:5000/api/host/properties?host_id=${host.host_id}`);
+      const response = await fetch(`https://test-backend-hd6i.onrender.com/api/host/properties?host_id=${host.host_id}`);
       const data = await response.json();
       if (response.ok) setProperties(data);
     } catch (err) {
@@ -236,7 +236,7 @@ function HostDashboard({ showToast }) {
     
     console.log('Fetching bookings for host:', host.host_id);
     
-    const response = await fetch(`http://localhost:5000/api/bookings/host/${host.host_id}`);
+    const response = await fetch(`https://test-backend-hd6i.onrender.com/api/bookings/host/${host.host_id}`);
     
     if (response.ok) {
       const data = await response.json();
@@ -331,7 +331,7 @@ function HostDashboard({ showToast }) {
     });
     
     try {
-      const response = await fetch('http://localhost:5000/api/upload/property-images', {
+      const response = await fetch('https://test-backend-hd6i.onrender.com/api/upload/property-images', {
         method: 'POST',
         body: formData
       });
@@ -356,7 +356,7 @@ function HostDashboard({ showToast }) {
     formData.append('video', videoFile);
     
     try {
-      const response = await fetch('http://localhost:5000/api/upload/property-video', {
+      const response = await fetch('https://test-backend-hd6i.onrender.com/api/upload/property-video', {
         method: 'POST',
         body: formData
       });
@@ -441,7 +441,7 @@ function HostDashboard({ showToast }) {
     try {
       const host = JSON.parse(localStorage.getItem('host_user'));
       const response = await fetch(
-        `http://localhost:5000/api/host/properties/${propertyId}?host_id=${host.host_id}`,
+        `https://test-backend-hd6i.onrender.com/api/host/properties/${propertyId}?host_id=${host.host_id}`,
         { method: 'DELETE' }
       );
       if (response.ok) {
@@ -495,8 +495,8 @@ function HostDashboard({ showToast }) {
     
     const host = JSON.parse(localStorage.getItem('host_user'));
     const url = editingProperty
-      ? `http://localhost:5000/api/host/properties/${editingProperty.property_id}`
-      : 'http://localhost:5000/api/host/properties';
+      ? `https://test-backend-hd6i.onrender.com/api/host/properties/${editingProperty.property_id}`
+      : 'https://test-backend-hd6i.onrender.com/api/host/properties';
     
     const method = editingProperty ? 'PUT' : 'POST';
     
@@ -552,7 +552,7 @@ function HostDashboard({ showToast }) {
   try {
     const status = action === 'approve' ? 'confirmed' : 'cancelled';
     
-    const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/status`, {
+    const response = await fetch(`https://test-backend-hd6i.onrender.com/api/bookings/${bookingId}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
@@ -580,7 +580,7 @@ function HostDashboard({ showToast }) {
 // ✅ Add this new function in HostDashboard.jsx
 const cancelOverlappingBookings = async (confirmedBooking) => {
   try {
-    await fetch(`http://localhost:5000/api/bookings/cancel-overlapping`, {
+    await fetch(`https://test-backend-hd6i.onrender.com/api/bookings/cancel-overlapping`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
