@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getUserConversations } from '../services/messagedAPI.js';
-import ChatModal from './ChatModal';
+import ChatModal from './chatModal.jsx';
 
 function ChatList({ currentUser, showToast }) {
   const [conversations, setConversations] = useState([]);
